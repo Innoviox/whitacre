@@ -88,3 +88,8 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+**/**.dylib
+whitacre-mobile/Library/PackageCache/com.unity.2d.animation@7.0.6
+whitacre-mobile/Library/PackageCache/com.unity.2d.animation@7.0.6
+whitacre-mobile/Library/PackageCache/
