@@ -9,7 +9,7 @@ SHAPES = [ # top -> bottom
 ]
 
 COLORS = 'RYGO' # red, yellow, green, orange
-EMPTY = 'B'
+EMPTY = ' '
 
 @dataclass
 class Tile:
@@ -34,7 +34,7 @@ class Board:
         for i in range(self.rows):
             self.board.append([])
             for j in range(self.cols):
-                self.board[-1].append('B')
+                self.board[-1].append(EMPTY)
 
     def display(self):
         disp = [i[:] for i in self.board[:]]
@@ -42,7 +42,7 @@ class Board:
         if self.tile:
             Board.fix_tile_to_board(self.tile, disp)
             
-        print('\n'.join(''.join(i) for i in disp))
+        print('\n'.join(('|' + ''.join(i) + '|') for i in disp))
 
     def start_game(self):
         while not self.full():
@@ -65,7 +65,7 @@ class Board:
         x = input()
         match x:
             case 'd':
-                self.tile.x = min(self.tile.x + 1, self.cols - 1)
+                self.tile.x = min(self.tile.x + 1, self.cols - max(map(int, self.tile.shape)))
             case 'a':
                 self.tile.x = max(self.tile.x - 1, 0)
         # todo rotate
@@ -85,9 +85,7 @@ class Board:
                     board[len(board) - y - 1][tile.x + x_add] = tile.color
 
     def at_bottom(self, tile):
-        print("CHECKING AT BOTTOM", tile)
         if tile.y == 0:
-            print("\tAT BOTTOM: A")
             return True
 
         # only need to check lowest index at each x_add
@@ -97,17 +95,11 @@ class Board:
             if any(i >= l for i in used):
                 continue # something at this width was already checked
             
-            # now need to change y_add back
-            # y_add_new = len(tile.shape) - y_add - 1
-            
             for x_add in range(max(used), l):
-                print(f"{y_add=} {x_add=}")
                 if self.board[self.rows - tile.y - y_add][tile.x + x_add] != EMPTY:
-                    print("\tAT BOTTOM: B")
                     return True
 
             used.append(l)
-        print("OFF BOTTOM")
         return False
         
 
