@@ -2,13 +2,14 @@ from dataclasses import dataclass
 import time
 import random
 
-SHAPES = [
+SHAPES = [ # top -> bottom
     '1111',
     '121',
-    '22'
+    '22' 
 ]
 
 COLORS = 'RYGO' # red, yellow, green, orange
+EMPTY = 'B'
 
 @dataclass
 class Tile:
@@ -71,8 +72,8 @@ class Board:
 
     def tick(self):
         self.tile.y -= 1
-        if self.tile.y == 0: # it can hit a tile on the board, todo
-            self.fix_tile_to_board(self.tile, self.board)
+        if self.at_bottom(self.tile): # it can hit a tile on the board, todo
+            self.heights = self.fix_tile_to_board(self.tile, self.board)
             self.tile = None
 
     @staticmethod
@@ -83,6 +84,31 @@ class Board:
                 for x_add in range(int(length)):
                     board[len(board) - y - 1][tile.x + x_add] = tile.color
 
+    def at_bottom(self, tile):
+        print("CHECKING AT BOTTOM", tile)
+        if tile.y == 0:
+            print("\tAT BOTTOM: A")
+            return True
+
+        # only need to check lowest index at each x_add
+        used = [0]
+        for y_add, length in enumerate(tile.shape[::-1]):
+            l = int(length)
+            if any(i >= l for i in used):
+                continue # something at this width was already checked
+            
+            # now need to change y_add back
+            # y_add_new = len(tile.shape) - y_add - 1
+            
+            for x_add in range(max(used), l):
+                print(f"{y_add=} {x_add=}")
+                if self.board[self.rows - tile.y - y_add][tile.x + x_add] != EMPTY:
+                    print("\tAT BOTTOM: B")
+                    return True
+
+            used.append(l)
+        print("OFF BOTTOM")
+        return False
         
 
 b = Board()
