@@ -58,7 +58,15 @@ class Board:
         ...
 
     def take_input(self):
-        input()
+        if not self.tile:
+            return
+        
+        x = input()
+        match x:
+            case 'd':
+                self.tile.x = min(self.tile.x + 1, self.cols - 1)
+            case 'a':
+                self.tile.x = max(self.tile.x - 1, 0)
         # todo rotate
 
     def tick(self):
