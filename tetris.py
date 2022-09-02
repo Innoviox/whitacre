@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import time
 import random
+import enum
 
 SHAPES = [ # top -> bottom
     '1111',
@@ -11,12 +12,60 @@ SHAPES = [ # top -> bottom
 COLORS = 'RYGO' # red, yellow, green, orange
 EMPTY = ' '
 
+class Direction(enum.Enum):
+    LEFT = 1
+    RIGHT = 2
+    DOWN = 3
+    UP = 4
+    
+
 @dataclass
 class Tile:
     x: int
     y: int
     shape: str
     color: str
+
+    def move(self, direction, board):
+        match direction:
+            case Direction.LEFT:
+                if self.x == 0:
+                    return False
+                
+                for y_delta in range(len(self.shape)):
+                    if board[len(board) - self.y - y_delta - 1][self.x - 1] != EMPTY:
+                        return False
+
+                self.x -= 1
+                return True
+            case Direction.RIGHT:
+                for y_delta, x_delta in enumerate(self.shape):
+                    x = self.x + int(x_delta)
+                    if x >= len(board[0]):
+                        return False
+                    if board[len(board) - self.y - y_delta - 1][x] != EMPTY:
+                        return False
+
+                self.x += 1
+                return True
+            case Direction.DOWN:
+                if self.y == 0:
+                    return False
+
+                for y_delta, x_delta in enumerate(self.shape[::-1]):
+                    for xd in range(int(x_delta)):
+                        x = self.x + xd
+                        y = len(board) - self.y - y_delta
+                        if y < 0:
+                            continue
+                        if x >= len(board[0]):
+                            return False
+                        if board[y][x] != EMPTY:
+                            return False                    
+                self.y -= 1
+                return True
+            case Direction.UP:
+                raise NotImplemented()
 
 class Board:
     def __init__(self):
@@ -65,14 +114,13 @@ class Board:
         x = input()
         match x:
             case 'd':
-                self.tile.x = min(self.tile.x + 1, self.cols - max(map(int, self.tile.shape)))
+                self.tile.move(Direction.RIGHT, self.board)
             case 'a':
-                self.tile.x = max(self.tile.x - 1, 0)
+                self.tile.move(Direction.LEFT, self.board)
         # todo rotate
 
     def tick(self):
-        self.tile.y -= 1
-        if self.at_bottom(self.tile): # it can hit a tile on the board, todo
+        if not self.tile.move(Direction.DOWN, self.board):
             self.heights = self.fix_tile_to_board(self.tile, self.board)
             self.tile = None
 
@@ -84,24 +132,6 @@ class Board:
                 for x_add in range(int(length)):
                     board[len(board) - y - 1][tile.x + x_add] = tile.color
 
-    def at_bottom(self, tile):
-        if tile.y == 0:
-            return True
-
-        # only need to check lowest index at each x_add
-        used = [0]
-        for y_add, length in enumerate(tile.shape[::-1]):
-            l = int(length)
-            if any(i >= l for i in used):
-                continue # something at this width was already checked
-            
-            for x_add in range(max(used), l):
-                if self.board[self.rows - tile.y - y_add][tile.x + x_add] != EMPTY:
-                    return True
-
-            used.append(l)
-        return False
-        
 
 b = Board()
 b.start_game()
