@@ -69,7 +69,7 @@ class Tile:
 
 class Board:
     def __init__(self):
-        self.rows = 10
+        self.rows = 20
         self.cols = 5
 
         self.board = []
@@ -117,6 +117,9 @@ class Board:
                 self.tile.move(Direction.RIGHT, self.board)
             case 'a':
                 self.tile.move(Direction.LEFT, self.board)
+            case 's':
+                while self.tile.move(Direction.DOWN, self.board):
+                    pass
         # todo rotate
 
     def tick(self):
