@@ -77,8 +77,6 @@ class Board:
 
         self.tile = None
 
-        self.heights = [0 for _ in range(self.cols)]
-
     def initialize_board(self):
         for i in range(self.rows):
             self.board.append([])
@@ -123,10 +121,22 @@ class Board:
         # todo rotate
 
     def tick(self):
+        # move tile down
         if not self.tile.move(Direction.DOWN, self.board):
-            self.heights = self.fix_tile_to_board(self.tile, self.board)
+            self.fix_tile_to_board(self.tile, self.board)
             self.tile = None
 
+        # check for tetrises
+        tetrii = []
+        for idx, row in enumerate(self.board):
+            if all(i != EMPTY for i in row):
+                print("TETRIS!")
+                tetrii.append(idx)
+
+        for idx in tetrii:
+            self.board.pop(idx)
+            self.board.insert(0, [EMPTY for _ in range(self.cols)])
+            
     @staticmethod
     def fix_tile_to_board(tile, board): # modifies in-place
         for idx, length in enumerate(tile.shape):
