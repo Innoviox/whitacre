@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import time
 import random
 import enum
+import string
 
 SHAPES = [ # top -> bottom, ignore trailing zeros please
     [
@@ -19,9 +20,13 @@ SHAPES = [ # top -> bottom, ignore trailing zeros please
     ],
     [
         [[1], [1], [1, 1]],
+        [[0, 1], [0, 1], [1, 1]],
         [[1, 1, 1], [1]],
+        [[1, 1, 1], [0, 0, 1]],
+        [[0, 0, 1], [1, 1, 1]],
+        [[1], [1, 1, 1]],
         [[1, 1], [0, 1], [0, 1]],
-        [[0, 0, 1], [1, 1, 1]]
+        [[1, 1], [1], [1]]
     ],
     [
         [[1], [1, 1], [0, 1]],
@@ -31,7 +36,7 @@ SHAPES = [ # top -> bottom, ignore trailing zeros please
     ]
 ]
 
-COLORS = 'RYGO' # red, yellow, green, orange
+COLORS = list(string.ascii_uppercase)
 EMPTY = ' '
 
 class Direction(enum.Enum):
@@ -56,7 +61,13 @@ class Tile:
     y: int
     shapes: list[list[int]]
     color: str
+    # color: list[list[str]] = []
     rotation: int = 0
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(self, *args, **kwargs)
+    #     for i, row in enumerate(self.sha
+        
 
     def move(self, direction, board):
         match direction:
