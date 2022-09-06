@@ -65,7 +65,7 @@ class Tile:
                 return True
             case Direction.RIGHT:
                 for y_delta, x_delta in enumerate(self.shape):
-                    x = self.x + sum(x_delta)
+                    x = self.x + len(x_delta)
                     if x >= len(board[0]):
                         return False
                     if board[len(board) - self.y - y_delta - 1][x] != EMPTY:
@@ -78,10 +78,10 @@ class Tile:
                     return False
 
                 for y_delta, x_delta in enumerate(self.shape[::-1]):
-                    for xd in range(int(x_delta)):
+                    for xd in range(len(x_delta)):
                         x = self.x + xd
                         y = len(board) - self.y - y_delta
-                        if y < 0:
+                        if y < 0 or x_delta[xd] == 0:
                             continue
                         if x >= len(board[0]):
                             return False
@@ -178,8 +178,9 @@ class Board:
         for idx, length in enumerate(tile.shape):
             y = tile.y + idx
             if y < len(board):
-                for x_add in range(int(length)):
-                    board[len(board) - y - 1][tile.x + x_add] = tile.color
+                for x_add in range(len(length)):
+                    if length[x_add] != 0:
+                        board[len(board) - y - 1][tile.x + x_add] = tile.color
 
 
 b = Board()
