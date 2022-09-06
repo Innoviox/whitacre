@@ -4,9 +4,10 @@ import random
 import enum
 
 SHAPES = [ # top -> bottom
-    '1111',
-    '121',
-    '22' 
+    # '1111',
+    [[1, 1, 1, 1], [4]],
+    # '121',
+    [[2, 2]] 
 ]
 
 COLORS = 'RYGO' # red, yellow, green, orange
@@ -17,14 +18,24 @@ class Direction(enum.Enum):
     RIGHT = 2
     DOWN = 3
     UP = 4
+
+    @property
+    def rotation(self):
+        match self:
+            case Direction.LEFT:
+                return -1
+            case Direction.RIGHT:
+                return 1
+        raise NotImplemented()
     
 
 @dataclass
 class Tile:
     x: int
     y: int
-    shape: str
+    shapes: list[list[int]]
     color: str
+    rotation: int = 0
 
     def move(self, direction, board):
         match direction:
@@ -66,6 +77,13 @@ class Tile:
                 return True
             case Direction.UP:
                 raise NotImplemented()
+
+    def rotate(self, direction, board):
+        self.rotation = (self.rotation + direction.rotation) % len(self.shapes)
+
+    @property
+    def shape(self):
+        return self.shapes[self.rotation]
 
 class Board:
     def __init__(self):
@@ -118,6 +136,10 @@ class Board:
             case 's':
                 while self.tile.move(Direction.DOWN, self.board):
                     pass
+            case 'z':
+                self.tile.rotate(Direction.LEFT, self.board)
+            case 'x':
+                self.tile.rotate(Direction.RIGHT, self.board)
         # todo rotate
 
     def tick(self):
