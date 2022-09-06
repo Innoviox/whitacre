@@ -58,7 +58,7 @@ class Tile:
                         while self.shape[y_delta][non_zero_idx] == 0:
                             non_zero_idx += 1
                     
-                    if board[len(board) - self.y - y_delta - 1][self.x - 1 + non_zero_idx] != EMPTY:
+                    if board.board[board.rows - self.y - y_delta - 1][self.x - 1 + non_zero_idx] != EMPTY:
                         return False
 
                 self.x -= 1
@@ -66,9 +66,9 @@ class Tile:
             case Direction.RIGHT:
                 for y_delta, x_delta in enumerate(self.shape):
                     x = self.x + len(x_delta)
-                    if x >= len(board[0]):
+                    if x >= board.cols:
                         return False
-                    if board[len(board) - self.y - y_delta - 1][x] != EMPTY:
+                    if board.board[board.rows - self.y - y_delta - 1][x] != EMPTY:
                         return False
 
                 self.x += 1
@@ -80,12 +80,12 @@ class Tile:
                 for y_delta, x_delta in enumerate(self.shape[::-1]):
                     for xd in range(len(x_delta)):
                         x = self.x + xd
-                        y = len(board) - self.y - y_delta
+                        y = board.rows - self.y - y_delta
                         if y < 0 or x_delta[xd] == 0:
                             continue
-                        if x >= len(board[0]):
+                        if x >= board.cols:
                             continue
-                        if board[y][x] != EMPTY:
+                        if board.board[y][x] != EMPTY:
                             return False                    
                 self.y -= 1
                 return True
@@ -93,8 +93,25 @@ class Tile:
                 raise NotImplemented()
 
     def rotate(self, direction, board):
+        old_rotation = self.rotation
         self.rotation = (self.rotation + direction.rotation) % len(self.shapes)
-        # todo check for room, move to fit if possible, if impossible don't rotate
+        # this code fuckin sucks
+        try:
+            Board.fix_tile_to_board(self, [i[:] for i in board.board[:]])
+            return True
+        except IndexError:
+            sx = self.x
+            for xd in [1, -1, 2, -2, 3, -3, 4, -4, 5, -5]:
+                self.x = sx + xd
+                if not 0 <= self.x < board.cols:
+                    continue
+                try:
+                    Board.fix_tile_to_board(self, [i[:] for i in board.board[:]])
+                    return True
+                except IndexError:
+                    pass
+        self.rotation = old_rotation
+        return False                   
 
     @property
     def shape(self):
@@ -145,20 +162,20 @@ class Board:
         x = input()
         match x:
             case 'd':
-                self.tile.move(Direction.RIGHT, self.board)
+                self.tile.move(Direction.RIGHT, self)
             case 'a':
-                self.tile.move(Direction.LEFT, self.board)
+                self.tile.move(Direction.LEFT, self)
             case 's':
-                while self.tile.move(Direction.DOWN, self.board):
+                while self.tile.move(Direction.DOWN, self):
                     pass
             case 'z':
-                self.tile.rotate(Direction.LEFT, self.board)
+                self.tile.rotate(Direction.LEFT, self)
             case 'x':
-                self.tile.rotate(Direction.RIGHT, self.board)
+                self.tile.rotate(Direction.RIGHT, self)
 
     def tick(self):
         # move tile down
-        if not self.tile.move(Direction.DOWN, self.board):
+        if not self.tile.move(Direction.DOWN, self):
             self.fix_tile_to_board(self.tile, self.board)
             self.tile = None
 
