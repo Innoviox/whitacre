@@ -4,13 +4,13 @@ import random
 import enum
 
 SHAPES = [ # top -> bottom
-    [
-        [[1], [1], [1], [1]],
-        [[1, 1, 1, 1]]
-    ],
-    [
-        [[1, 1], [1, 1]]
-    ],
+    # [
+    #     [[1], [1], [1], [1]],
+    #     [[1, 1, 1, 1]]
+    # ],
+    # [
+    #     [[1, 1], [1, 1]]
+    # ],
     [
         [[1], [1, 1], [1]],
         [[1, 1, 1], [0, 1]],
@@ -84,7 +84,7 @@ class Tile:
                         if y < 0 or x_delta[xd] == 0:
                             continue
                         if x >= len(board[0]):
-                            return False
+                            continue
                         if board[y][x] != EMPTY:
                             return False                    
                 self.y -= 1
@@ -175,7 +175,7 @@ class Board:
             
     @staticmethod
     def fix_tile_to_board(tile, board): # modifies in-place
-        for idx, length in enumerate(tile.shape):
+        for idx, length in enumerate(tile.shape[::-1]):
             y = tile.y + idx
             if y < len(board):
                 for x_add in range(len(length)):
