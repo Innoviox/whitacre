@@ -4,10 +4,19 @@ import random
 import enum
 
 SHAPES = [ # top -> bottom
-    # '1111',
-    [[1, 1, 1, 1], [4]],
-    # '121',
-    [[2, 2]] 
+    [
+        [[1], [1], [1], [1]],
+        [[1, 1, 1, 1]]
+    ],
+    [
+        [[1, 1], [1, 1]]
+    ],
+    [
+        [[1], [1, 1], [1]],
+        [[1, 1, 1], [0, 1]],
+        [[0, 1], [1, 1], [0, 1]],
+        [[0, 1], [1, 1, 1]]
+    ]
 ]
 
 COLORS = 'RYGO' # red, yellow, green, orange
@@ -44,14 +53,19 @@ class Tile:
                     return False
                 
                 for y_delta in range(len(self.shape)):
-                    if board[len(board) - self.y - y_delta - 1][self.x - 1] != EMPTY:
+                    non_zero_idx = 0
+                    if 0 in self.shape[y_delta]:
+                        while self.shape[y_delta][non_zero_idx] == 0:
+                            non_zero_idx += 1
+                    
+                    if board[len(board) - self.y - y_delta - 1][self.x - 1 + non_zero_idx] != EMPTY:
                         return False
 
                 self.x -= 1
                 return True
             case Direction.RIGHT:
                 for y_delta, x_delta in enumerate(self.shape):
-                    x = self.x + int(x_delta)
+                    x = self.x + sum(x_delta)
                     if x >= len(board[0]):
                         return False
                     if board[len(board) - self.y - y_delta - 1][x] != EMPTY:
@@ -80,6 +94,7 @@ class Tile:
 
     def rotate(self, direction, board):
         self.rotation = (self.rotation + direction.rotation) % len(self.shapes)
+        # todo check for room, move to fit if possible, if impossible don't rotate
 
     @property
     def shape(self):
@@ -140,7 +155,6 @@ class Board:
                 self.tile.rotate(Direction.LEFT, self.board)
             case 'x':
                 self.tile.rotate(Direction.RIGHT, self.board)
-        # todo rotate
 
     def tick(self):
         # move tile down
