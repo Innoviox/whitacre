@@ -42,6 +42,8 @@ SHAPES = [ # top -> bottom, ignore trailing zeros please
 COLORS = list(string.ascii_uppercase)
 EMPTY = ' '
 
+WORDLE_COLORS = { -1: 'white', 0: 'black', 1: 'yellow', 2: 'green' }
+
 class Direction(enum.Enum):
     LEFT = 1
     RIGHT = 2
@@ -177,7 +179,11 @@ class Board:
             self.tick()
 
     def spawn_tile(self):
-        self.tile = Tile(0, self.rows, random.choice(SHAPES), random.choice(COLORS))
+        print(COLORS)
+        color = random.choice(COLORS)
+        # while any(color in i for i in self.board):
+        #     color = random.choice(COLORS)
+        self.tile = Tile(0, self.rows, random.choice(SHAPES), color)
 
     def full(self):
         ...
@@ -251,14 +257,27 @@ class Game(tk.Tk):
                 label.grid(row=row, column=col, sticky="news")
                 self.labels[-1].append(label)
         
-        self.speed = 1000
+        self.speed = 500
 
         self.bind("<KeyRelease>", self.handle_input)
+
+        self.wordle = Wordle.random()
+        print(self.wordle.word)
+        self.last_guess = []
+
+        self.knowledge = {
+            "black": [],
+            "yellow": []
+        }
+        for i in range(1, 6):
+            self.knowledge[i] = []
 
     def start(self):
         self.tick()
 
     def tick(self):
+        self.speed -= 1
+        
         self.board.tick()
         self.update_view()
         self.after(self.speed, self.tick)
@@ -268,7 +287,40 @@ class Game(tk.Tk):
         for r, row in enumerate(self.labels):
             for c, label in enumerate(row):
                 label.config(text=d[r][c])
+        
+        if self.last_guess == self.board.board[-1]:
+            return
+        self.last_guess = self.board.board[-1][:]
+        
+        guess = self.board.board[-1][3:8]
+        evaluation = self.wordle.num_evaluate(guess)
+        for idx, i in enumerate(evaluation):
+            l = self.labels[-1][3 + idx]
+            if i == 0 and guess[idx] in COLORS:
+                self.knowledge["black"].append(guess[idx])
+                COLORS.remove(guess[idx])
+            elif i == 1:
+                if guess[idx] in self.knowledge["yellow"]:
+                    self.knowledge["yellow"].remove(guess[idx])
+                self.knowledge[idx + 1].append((guess[idx], i))
+            elif i == 2:
+                if guess[idx] in self.knowledge["yellow"]:
+                    self.knowledge["yellow"].remove(guess[idx])
+                self.knowledge[idx + 1] = [(guess[idx], i)]    
+            
+            l.config(background=WORDLE_COLORS[i], foreground="white")
 
+        for i in self.board.board[-1][:3] + self.board.board[-1][8:]:
+            if i in self.wordle.word and i not in self.knowledge["yellow"]:
+                self.knowledge["yellow"].append(i)
+            elif i not in self.wordle.word and i not in self.knowledge["black"]:
+                self.knowledge["black"].append(i)
+                if i in COLORS:
+                    COLORS.remove(i)
+        # print(guess, ''.join(self.wordle.evaluate(guess)))
+        for k, v in self.knowledge.items():
+            print(k, v)
+        
     def handle_input(self, e):
         self.board.take_input(e.char)
         self.update_view()
