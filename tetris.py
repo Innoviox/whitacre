@@ -5,6 +5,8 @@ import enum
 import string
 import tkinter as tk
 
+from zarf.wordle import Wordle
+
 SHAPES = [ # top -> bottom, ignore trailing zeros please
     [
         [[1], [1], [1], [1]],
@@ -240,8 +242,12 @@ class Game(tk.Tk):
             self.mainframe.grid_rowconfigure(row, minsize=30)
             self.labels.append([])
             for col in range(self.board.cols):
+                background = "white"
+                if col < 3 or col > 7:
+                    background = "lightgrey"
+                
                 self.mainframe.grid_columnconfigure(col, minsize=30)
-                label = tk.Label(master=self.mainframe, text=" ", background="white", borderwidth=2, relief="raised")
+                label = tk.Label(master=self.mainframe, text=" ", background=background, borderwidth=2, relief="raised")
                 label.grid(row=row, column=col, sticky="news")
                 self.labels[-1].append(label)
         
