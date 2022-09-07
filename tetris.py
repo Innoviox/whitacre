@@ -3,6 +3,7 @@ import time
 import random
 import enum
 import string
+import tkinter as tk
 
 SHAPES = [ # top -> bottom, ignore trailing zeros please
     [
@@ -143,7 +144,7 @@ class Tile:
 class Board:
     def __init__(self):
         self.rows = 20
-        self.cols = 5
+        self.cols = 11
 
         self.board = []
         self.initialize_board()
@@ -222,6 +223,24 @@ class Board:
                     if length[x_add] != 0:
                         board[len(board) - y - 1][tile.x + x_add] = tile.color
 
+class Game(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-b = Board()
-b.start_game()
+        self.board = Board()
+
+        self.labels = []
+        for row in range(self.board.rows):
+            self.grid_rowconfigure(row, minsize=30)
+            self.labels.append([])
+            for col in range(self.board.cols):
+                self.grid_columnconfigure(col, minsize=30)
+                label = tk.Label(text=" ", background="white", borderwidth=2, relief="raised")
+                label.grid(row=row, column=col, sticky="news")
+                self.labels[-1].append(label)
+        
+        self.title("something else")
+
+if __name__ == "__main__":
+    g = Game()
+    g.mainloop()
