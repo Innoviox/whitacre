@@ -163,7 +163,8 @@ class Board:
         if self.tile:
             Board.fix_tile_to_board(self.tile, disp)
             
-        print('\n'.join(('|' + ''.join(i) + '|') for i in disp))
+        # print('\n'.join(('|' + ''.join(i) + '|') for i in disp))
+        return disp
 
     def start_game(self):
         while not self.full():
@@ -179,12 +180,11 @@ class Board:
     def full(self):
         ...
 
-    def take_input(self):
+    def take_input(self, char):
         if not self.tile:
             return
-        
-        x = input()
-        match x:
+
+        match char:
             case 'd':
                 self.tile.move(Direction.RIGHT, self)
             case 'a':
@@ -198,6 +198,9 @@ class Board:
                 self.tile.rotate(Direction.RIGHT, self)
 
     def tick(self):
+        if self.tile is None:
+            self.spawn_tile()
+            
         # move tile down
         if not self.tile.move(Direction.DOWN, self):
             self.fix_tile_to_board(self.tile, self.board)
@@ -229,18 +232,42 @@ class Game(tk.Tk):
 
         self.board = Board()
 
+        self.mainframe = tk.Frame()
+        self.mainframe.pack()
+
         self.labels = []
         for row in range(self.board.rows):
-            self.grid_rowconfigure(row, minsize=30)
+            self.mainframe.grid_rowconfigure(row, minsize=30)
             self.labels.append([])
             for col in range(self.board.cols):
-                self.grid_columnconfigure(col, minsize=30)
-                label = tk.Label(text=" ", background="white", borderwidth=2, relief="raised")
+                self.mainframe.grid_columnconfigure(col, minsize=30)
+                label = tk.Label(master=self.mainframe, text=" ", background="white", borderwidth=2, relief="raised")
                 label.grid(row=row, column=col, sticky="news")
                 self.labels[-1].append(label)
         
-        self.title("something else")
+        self.speed = 1000
+
+        self.bind("<KeyRelease>", self.handle_input)
+
+    def start(self):
+        self.tick()
+
+    def tick(self):
+        self.board.tick()
+        self.update_view()
+        self.after(self.speed, self.tick)
+
+    def update_view(self):
+        d = self.board.display()
+        for r, row in enumerate(self.labels):
+            for c, label in enumerate(row):
+                label.config(text=d[r][c])
+
+    def handle_input(self, e):
+        self.board.take_input(e.char)
+        self.update_view()
 
 if __name__ == "__main__":
     g = Game()
+    g.start()
     g.mainloop()
