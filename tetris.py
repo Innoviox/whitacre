@@ -204,6 +204,8 @@ class Board:
                 self.tile.rotate(Direction.LEFT, self)
             case 'x':
                 self.tile.rotate(Direction.RIGHT, self)
+            case 'w':
+                self.tile.rotate(Direction.LEFT, self)
 
     def tick(self):
         if self.tile is None:
@@ -276,7 +278,7 @@ class Game(tk.Tk):
         self.tick()
 
     def tick(self):
-        self.speed -= 1
+        # self.speed -= 1
         
         self.board.tick()
         self.update_view()
